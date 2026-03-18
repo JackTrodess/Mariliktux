@@ -10,9 +10,9 @@
 
 Mariliktux ist ein browserbasiertes Rennspiel, das auf der Open-Source-Engine SuperTuxKart (STK) aufbaut und ein neuartiges Transformer-Mechanik-System einführt: Fahrzeuge können während des Rennens zwischen Fahr-, Flug-, Sprung- und Mech-Modus wechseln. Das Projekt adressiert eine signifikante Lücke im aktuellen Spielmarkt — kein existierendes browserbasiertes Rennspiel kombiniert flüssige Echtzeit-Transformationsanimationen mit einem vollständigen Multi-Modus-Gameplay-System, kollaborativem Online-Multiplayer, Community-Modding und ethischer Monetarisierung.
 
-Der DSR-Report ist nach dem Drei-Zyklen-Modell strukturiert: Der **Relevance Cycle** analysiert Markt, Spieler und technologische Umgebung. Der **Rigor Cycle** verankert jede Designentscheidung in existierenden Referenzspielen, wissenschaftlichen Erkenntnissen und technischen Standards. Der **Design Cycle** beschreibt zehn miteinander verflochtene Artefakt-Subsysteme — vom Animationssystem über die Multiplayer-Architektur bis zum Low-Code-Modding.
+Der DSR-Report ist nach dem Drei-Zyklen-Modell strukturiert: Der **Relevance Cycle** analysiert Markt, Spieler und technologische Umgebung. Der **Rigor Cycle** verankert jede Designentscheidung in existierenden Referenzspielen, wissenschaftlichen Erkenntnissen und technischen Standards. Der **Design Cycle** beschreibt elf miteinander verflochtene Artefakt-Subsysteme — vom Animationssystem über die Multiplayer-Architektur und das WAR-Mode-Kampfsystem bis zum Low-Code-Modding.
 
-Die Kernartefakte des Projekts sind: (1) ein Hybrid-Animationssystem mit skelettaler Animation und Morph Targets für nahtlose Transformationen, (2) ein Multi-Modus-Level-Design-Framework mit Automatic-Trigger-Architektur, (3) ein ethisches Progressions- und Belohnungssystem nach dem iRacing/Forza-Hybrid-Modell, (4) eine FSM-basierte 4-Layer-Renn-KI mit Rubber-Banding und adaptiver Schwierigkeit, (5) ein WebRTC+SFU-Sprachchat mit Spatial Audio, (6) ein Scratch-ähnliches Blockly-Modding-System mit WASM-Sandboxing, (7) eine WebTransport-Multiplayer-Architektur mit Server-Autorität und (8) ein Three.js/WebGPU-Renderer mit Toon-Shading, der das 60-fps-Ziel durch aggressives Draw-Call-Management erreicht.
+Die Kernartefakte des Projekts sind: (1) ein Hybrid-Animationssystem mit skelettaler Animation und Morph Targets für nahtlose Transformationen, (2) ein Multi-Modus-Level-Design-Framework mit Automatic-Trigger-Architektur, (3) ein ethisches Progressions- und Belohnungssystem nach dem iRacing/Forza-Hybrid-Modell, (4) eine FSM-basierte 4-Layer-Renn-KI mit Rubber-Banding und adaptiver Schwierigkeit, (5) ein WebRTC+SFU-Sprachchat mit Spatial Audio, (6) ein Scratch-ähnliches Blockly-Modding-System mit WASM-Sandboxing, (7) eine WebTransport-Multiplayer-Architektur mit Server-Autorität (8) ein Three.js/WebGPU-Renderer mit Toon-Shading, der das 60-fps-Ziel durch aggressives Draw-Call-Management erreicht, und (9) ein WAR-Mode-Kampfsystem mit vier Sub-Modi (SKAT, REVERSI, Team Deathmatch, BOWL), das PvPvE-Fahrzeugkampf mit einem Tri-Modus-Waffensystem und vertikalen 3-Ebenen-Arenen kombiniert.
 
 Die 12-monatige Roadmap gliedert sich in vier Phasen: Foundation (Monate 1–3), Gameplay (Monate 4–6), Features (Monate 7–9) und Polish (Monate 10–12). Das Projekt ist als Open-Source-Erweiterung des SuperTuxKart-Ökosystems konzipiert und folgt damit dem Rigor-Cycle-Prinzip: Wissen aus der STK-Community und Wissensbasis zurückzuführen.
 
@@ -1383,6 +1383,258 @@ lod.addLevel(billboard, 300);       // Billboard/Impostor jenseits 300 Units
 | **Low-End Desktop/Laptop** | 30–60 fps | < 60 | Nur AA | CPU, < 20k |
 | **Mobile Browser** | 30 fps | < 50 | Minimal | CPU, < 5k |
 
+### 4.11 WAR Mode — Kampfmodus-System
+
+Das WAR-Mode-Kampfsystem erweitert Mariliktux um einen vollwertigen Fahrzeugkampf-Modus, der die Transformer-Mechanik (Auto/Flug/Mech) gezielt für Arena-basiertes PvPvE-Gameplay nutzt. Die Designentscheidungen basieren auf einer umfassenden Analyse existierender Fahrzeugkampfspiele — insbesondere [Twisted Metal](https://twistedmetal.fandom.com/wiki/Special_Weapon), [Mario Kart Battle Mode](https://www.mariowiki.com/Balloon_Battle), [Destruction AllStars](https://www.thegamer.com/destruction-allstars-breaker-mode-explained/) und [Crossout](https://crossout-archive.fandom.com/wiki/Weapons) — und integriert PvPvE-Elemente nach dem Vorbild von [War Thunders Arcade-Modus](https://wiki.warthunder.com/gamemode/arcade_battles). Vier Sub-Modi (SKAT, REVERSI, Team Deathmatch, BOWL) bedienen unterschiedliche Spielertypen und Lobby-Größen.
+
+#### 4.11.1 Waffensystem
+
+Das WAR-Mode-Waffensystem folgt einem **Tri-Modus-Design**, das die drei Transformer-Formen (Auto, Flug, Mech) als zentrale Balance-Achse nutzt. Jede Form ermöglicht oder beschränkt bestimmte Waffenkategorien — eine Designentscheidung, die direkt aus Twisted Metals fahrzeugspezifischem Spezialwaffen-Konzept abgeleitet ist ([Twisted Metal Wiki — Special Weapons](https://twistedmetal.fandom.com/wiki/Special_Weapon); [IGN Special Weapons Guide](https://www.ign.com/wikis/twisted-metal/Special_Weapons)).
+
+**Waffenkategorien:**
+
+| Kategorie | Beispiele | Rolle | Balance-Hebel |
+|-----------|----------|-------|---------------|
+| **Projektil (Verfolgend)** | Lenkraketen, Suchgeschosse | Allround-Offensive | Konterbar durch Geschwindigkeit/Ausweichen, Schild |
+| **Projektil (Direkt)** | Kanonenschüsse, Energiestrahlen | Skill-Shot-Offensive | Hoher Schaden, erfordert Zielen |
+| **Minen / Fallen** | Abgeworfene Minen, Klebefallen | Gebietskontrolle | Zeitverzögert, vermeidbar mit Aufmerksamkeit |
+| **Nahkampf / Ramme** | Klingenramme, Spikes, Bohrer | Nahkampf-Hochschaden | Erfordert Annäherung (hohes Risiko) |
+| **Flächenwirkung / Schockwelle** | EMP-Blast, Explosionspuls | Multi-Ziel-Treffer | Kurze Reichweite, langer Cooldown |
+| **Schild / Defensiv** | Energieschild, Reflektiv-Panzerung | Schadensminderung | Blockt einen Treffer, dann Aufladung nötig |
+| **Drohne / Geschütz** | Auto-Targeting-Kanone, Deployable | Passive Offensive | Begrenzte Ladungen, zerstörbar |
+
+**Modus-spezifisches Waffenverhalten:**
+
+- **Auto-Modus:** Voller Zugang zu Bodenminen und Fallen; Ram-Schadensbonus (höhere Masse = mehr Kollisionsschaden); beste horizontale Mobilität für Ausweichmanöver. Waffen: Maschinengewehre, Raketen, Kanone, Minen. Schwäche: Kann Luftziele kaum erreichen.
+- **Flug-Modus:** Zugang zu Fliegerbomben und gelenkten Luft-Boden-Raketen; höhere Geschwindigkeit, aber reduzierte Panzerung (Trade-off nach [Destruction AllStars Breaker-Prinzip](https://www.thesixthaxis.com/2021/02/06/destruction-allstars-guide-11-essential-tips-tricks/)). Waffen: Luft-Boden-Bomben, Geschwindigkeitsraketen, EMP-Höhenblast. Schwäche: Minen/Fallen irrelevant.
+- **Mech-Modus:** Zugang zu Nahkampfwaffen (Faust-Slam, Klinge) mit höchstem Einzeltreffer-Schaden; langsamste Geschwindigkeit, aber höchste Panzerung (analog zu [Crossouts Kabinen-/Teile-Schadensmodell](https://www.reddit.com/r/Crossout/comments/6gb75x/vehicle_constructiondamage_basics_guide/)). Waffen: Nahkampf-Slams, Kurzstrecken-Schrotflintenblast, Deployable Geschütze. Schwäche: Langsamste Bewegung, am verwundbarsten für Lenkraketen.
+
+**Waffenverhalten-Matrix:**
+
+| Waffe | Auto-Modus | Flug-Modus | Mech-Modus |
+|-------|-----------|-----------|-----------|
+| Lenkrakete | Voller Schaden | Reduziert (zu schnell für Zielerfassung) | Voller Schaden |
+| Mine | Abwurf nach hinten | Nicht einsetzbar | Vorwärts werfbar |
+| Ramme | Voller Bonus | Kein Bonus (kein Masseeinschlag) | Doppelter Bonus (schwerer) |
+| EMP-Blast | Voll | Halber Radius | Voll |
+| Drohne | Voll | Nicht einsetzbar | Voll |
+| Fliegerbombe | Nicht einsetzbar | Voller Schaden | Nicht einsetzbar |
+
+**Transformationsangriff:** Der Modus-Wechsel selbst erzeugt Flächenschaden an nahestehenden Fahrzeugen. Dies bestraft Spam-Transformationen und macht den Zeitpunkt des Wechsels zu einer taktischen Entscheidung.
+
+**Hybrid-Munitions-/Cooldown-System:**
+
+Das Waffensystem kombiniert drei Ebenen — inspiriert von Twisted Metals Cooldown-basiertem Spezialwaffen-Design und Mario Karts positionsbasiertem Item-System ([Polygon Battle Mode Guide](https://www.polygon.com/mario-kart-8-deluxe-guide/2017/4/28/15473910/battle-mode-tips-balloon-battle-bob-omb-blastrenegade-roundupcoin-runnersshine-thief/)):
+
+1. **Signatur-Spezialwaffe** (pro Fahrzeug/Form): Cooldown-basiert, immer verfügbar. Kurzer Cooldown (8–15 Sekunden). Dies ist die „Identitätswaffe" des Fahrzeugs.
+2. **Pickup-Waffen** (aus Arena-Boxen): Munitionsbasiert, mächtig aber begrenzt (2–5 Schuss). Schafft Anreize zur Arena-Durchquerung und Pickup-Kontrolle — analog zu STKs bestehendem [Item-System](https://www.speedrun.com/stk/guides/hpig5).
+3. **Ramme/Nahkampf**: Keine Munition/kein Cooldown — immer bei Kontakt verfügbar. Macht Nahkampf auch bei leerer Munition lebensfähig.
+
+#### 4.11.2 PvPvE-Design
+
+Der WAR Mode integriert NPC-Gegner als schnelle Punktequellen, die das PvP-Gleichgewicht stören, ohne es zu dominieren — ein Prinzip, das direkt aus [War Thunders Arcade-Modus](https://wiki.warthunder.com/gamemode/arcade_battles) übernommen wird, wo KI-Einheiten auf demselben Schlachtfeld wie PvP-Spieler agieren.
+
+**NPC-Stufensystem:**
+
+| NPC-Stufe | Trefferpunkte | Geschwindigkeit | Punktwert | Spawn-Ort |
+|-----------|--------------|----------------|-----------|-----------|
+| **Drohne** (leichteste) | 1 Treffer | Stationär/langsam | 5 Pkt. | Arena-Ränder |
+| **Patrol Bot** | 2–3 Treffer | Feste Route | 15 Pkt. | Mittel-Arena-Korridore |
+| **Mini-Boss Bot** | 8–10 Treffer | Aggressiv zum nächsten Spieler | 50 Pkt. | Arena-Zentrum, zeitgesteuert |
+| **Boss-Fahrzeug** | Hohe TP | Volle Kampf-KI | 150 Pkt. | Spezialevent-Spawn, 1 pro Runde |
+
+**Wellen-Spawning:**
+
+NPC-Wellen erscheinen alle **30–45 Sekunden** (nicht kontinuierlich), um dem PvP Freiraum zu geben (basierend auf [Spawn-Logik-Forschung](https://www.reddit.com/r/gamedesign/comments/vtgkbu/tips_on_enemy_spawn_logic_and_enemy_game_balance/)). Kleine Gruppen (2–4 NPCs pro Spawn-Punkt); nie mehr als 10% der Gesamtspieleranzahl gleichzeitig. Frühe Wellen enthalten nur Drohnen, mittlere Wellen Patrol Bots, späte Wellen Mini-Bosse. Bei weniger als 3 Spielern in der Arena werden NPC-Spawns unterdrückt.
+
+**Ökonomisches Gleichgewicht:**
+
+NPC-Kills sind **50–70% eines Spieler-Kills** wert — basierend auf [PvPvE-Balance-Forschung](https://www.reddit.com/r/gamedesign/comments/11atvrt/how_do_you_balance_pvp_combat_in_predominantly/). Zu niedrig: NPCs werden ignoriert. Zu hoch: Spieler meiden einander und farmen NPCs.
+
+**NPC-Aggro-Mechanik:**
+
+NPCs priorisieren den **Spieler an der Spitze der Bestenliste** — ein natürlicher Handicap-Mechanismus, der den Leader unter Druck setzt. NPCs verfolgen Spieler nicht über einen 50-m-Zonenradius hinaus und feuern **nicht auf Flug-Modus-Ziele** — die Luftform dient als NPC-Fluchtventil.
+
+**Anti-Air-Immunität für NPCs:** Boden-NPCs können fliegende Spieler nicht treffen. Dies incentiviert den Flug-Modus als Escape-Strategie, muss jedoch durch höhenspezifische Waffenbalance ausgeglichen werden (Luft-Boden-Angriffe erzielen vollen Schaden gegen NPCs).
+
+#### 4.11.3 Spielmodi
+
+##### SKAT (1v3) — Asymmetrischer Kampf
+
+Benannt nach dem deutschen Kartenspiel [Skat](https://en.wikipedia.org/wiki/Skat_(card_game)), in dem der Alleinspieler allein gegen zwei Verteidiger antritt. Der SKAT-Modus überträgt dieses asymmetrische Prinzip auf Fahrzeugkampf: Ein übermächtig ausgestatteter Alleinspieler kämpft gegen drei reguläre Gegenspieler.
+
+**Design-Grundlage:** Die Analyse asymmetrischer Multiplayer-Spiele zeigt kritische Lektionen. [Evolves Post-Mortem](https://www.reddit.com/r/Games/comments/8p2s2m/evolve_dev_says_4v1_caused_more_problems_than_we/) (4v1-Monster-Spiel, 2015) belegt: Wenn das 4er-Team perfekt koordinierte, war das Monster hilflos; bei fehlender Koordination gewann selbst ein schwaches Monster. Die zentrale Erkenntnis: Asymmetrische Balance muss auf **allen Skill-Levels** funktionieren. [Dead by Daylights](https://forums.bhvr.com/dead-by-daylight/discussion/comment/3757363) Ziel-Kill-Rate von 57–60% für den Killer (1v4) zeigt: Die Solo-Rolle muss absichtlich „übermächtig" sein, um den Zahlennachteil zu kompensieren. Für SKAT (1v3) wird eine **Ziel-Siegrate von 60–65%** für den Alleinspieler angestrebt.
+
+**Der Alleinspieler:**
+- **3× Trefferpunkte** gegenüber regulären Spielern
+- **+50% Waffenschaden**
+- **Radar-Vorteil**: Volle Minimap-Sicht, kann alle Gegenspieler jederzeit sehen (Information-Asymmetrie analog zu [Pac-Man Vs.](https://tvtropes.org/pmwiki/pmwiki.php/VideoGame/PacManVs/), wo der 1er-Spieler volle Kartenübersicht hat)
+- **Sofortiger Formwechsel** (1 Sekunde statt 3 Sekunden) — analog zum Alleinspieler im Skat, der Trumpf-Wahl und Skat-Einsicht besitzt
+- **Spezial-SKAT-Waffe**: Einzigartige mächtige Waffe, die regulären Spielern nicht zur Verfügung steht (z. B. Flächen-EMP, der mehrere Spieler gleichzeitig betäubt)
+- **Siegbedingung**: Zielpunktzahl erreichen (z. B. 200 Punkte) ODER alle 3 Gegner eliminieren
+- **Respawn**: 1 langer Respawn (15 Sekunden) mit massivem Punktabzug (−100 Pkt.)
+
+**Die Gegenspieler:**
+- Standard-Werte
+- Können den Alleinspieler nicht auf der Minimap sehen (nur visuelle Erkennung)
+- **Koordinationsbonus**: Innerhalb von 30 m zu einem anderen Gegenspieler stehend erhalten sie +15% Schaden vs. Alleinspieler — incentiviert Gruppierung ohne sie zu erzwingen
+- **Siegbedingung**: Kollektiv 300 Punkte ansammeln (gemeinsamer Pool) oder Alleinspieler auf 0 Respawns reduzieren
+- **Respawn**: Sofort (aber −50% der aktuellen Punktzahl)
+
+**Anti-Turtle-Mechanik:** Der Alleinspieler muss mindestens 20 Punkte pro 60-Sekunden-Fenster erzielen, sonst erleidet er passiven Schaden — analog zum Zeitdruck-Mechanismus im Skat-Kartenspiel.
+
+##### REVERSI — Kaskadierendes Tag-System
+
+Ein Fänger-Spieler taggt andere; getaggte Spieler werden neue Fänger, die jeweils **zwei weitere** taggen müssen, um zu entkommen — eine Kaskade: 1 → 2 → 4 potenzielle Fänger mit eskalierendem Druck. Inspiriert von [Halos Infection-Modus](https://www.halopedia.org/Infection), in dem getötete Überlebende zur Zombie-Seite wechseln.
+
+**Ausgangszustand:**
+- 1 Fänger (spezielle Fahrzeug-Visueller — leuchtende Umrandung, eigener Sound)
+- 3–7 Läufer (je nach Lobby-Größe)
+
+**Fang-Mechanik:**
+- Fänger taggt Läufer durch Rammen (Kontakt für 2+ Sekunden) ODER Treffer mit Netz-/Greifwaffe
+- Getaggter Läufer wird **Sekundärer Fänger**
+- Sekundäre Fänger müssen **2 Personen** taggen, um zurück zum Läufer-Status zu „entkommen"
+- Sekundäre Fänger, die bei Zeitablauf nur 1 Person getaggt haben, bleiben permanent Fänger für die Runde
+
+**Eskalationstabelle:**
+
+| Welle | Fänger-Anzahl | Situation |
+|-------|--------------|-----------|
+| Start | 1 | Einfache Jagd, viele Läufer |
+| Welle 2 | 2–3 | Läufer müssen Fluchtwege koordinieren |
+| Welle 3 | 3–5 | Arena fühlt sich überfüllt mit Fängern an |
+| Ende | Potenziell alle | Letzter Läufer gewinnt bei Überleben |
+
+**Asymmetrie:** Fänger haben +20% Geschwindigkeit und sind auf allen Minimaps sichtbar, können aber keine offensiven Waffen nutzen — Taggen ist ihre einzige Mechanik. Läufer haben vollen Waffenzugang, um Fänger temporär zu verlangsamen/betäuben.
+
+**Der REVERSI-Twist:** Bei 60 verbleibenden Sekunden erfolgt eine **Rollenumkehr** — alle Fänger werden temporär zu Läufern, und der letzte überlebende Läufer wird Fänger für eine finale 60-Sekunden-Bonusrunde. Dies verhindert Fänger-dominante Schneebälle.
+
+**Punktwertung:** Läufer: +1 Punkt pro 5 Sekunden Überleben; Fänger: +10 Punkte pro erfolgreichem Tag; letzter Läufer: +100 Bonuspunkte; entkappte Sekundäre Fänger: +25 Punkte.
+
+##### TEAM DEATHMATCH — Teamkampf
+
+Zwei Teams von Transformer-Fahrzeugen kämpfen um Eliminierungen. Das Punktesystem orientiert sich an [Rocket Leagues](https://rocketleague.fandom.com/wiki/Points) Prinzip, dass nicht nur der Schütze, sondern auch unterstützende Aktionen sichtbar und signifikant belohnt werden.
+
+**Match-Format:** 2 Teams mit je 2–4 Spielern; 5-Minuten-Match, erstes Team mit 100 Kills gewinnt ODER meiste Kills bei Zeitende. Respawn: 3-Sekunden-Timer, Wellen-Respawn alle 10 Sekunden bei gleichzeitigem Tod mehrerer Teammitglieder.
+
+**Punkteaktionen:**
+
+| Aktion | Punkte | Begründung |
+|--------|--------|-----------|
+| Kill | +10 | Primäres Ziel |
+| Assist (30%+ Schaden) | +5 | Belohnt Unterstützung |
+| Clutch Kill (Kill unter 20% TP) | +3 | Belohnt Können |
+| Teammitglied beschützt (Schuss geblockt) | +3 | Belohnt defensives Spiel |
+| NPC-Kill | +6 | Anreiz für NPC-Bekämpfung |
+| First Blood | +5 | Momentum-Starter |
+| Kill-Streak ×3 | +5 Bonus | Streak-Belohnung |
+| Streak Ender | +8 | Comeback-Anreiz — töte den Leader |
+
+**Wolf-Pack-Bonus:** +15% Schaden gegen das gegnerische Team, wenn alle lebenden Teammitglieder innerhalb von 40 m zueinander stehen — incentiviert koordiniertes Vorgehen.
+
+##### BOWL (FFA) — Free-for-All mit schrumpfender Arena
+
+Alle-gegen-alle-Chaos mit schrumpfender Arena und Eliminierung. Hybrid aus Punktesammlung und Elimination — inspiriert von [Mario Karts Balloon Battle](https://www.mariowiki.com/Balloon_Battle) (Punktesystem hält alle im Spiel) und [Destruction AllStars Gridfall](https://www.thegamer.com/destruction-allstars-breaker-mode-explained/) (Arena-Sektionen fallen weg).
+
+**3-Phasen-Design:**
+
+**Phase 1 — Grand Melee (Minuten 0–2):** Alle Spieler in voller Arena. Punktebasiertes Scoring (Kills = Punkte, Überlebenszeit = Punkte). NPCs aktiv an den Rändern als schnelle Punkte. Respawn: 5-Sekunden-Timer; nur 2 Respawns erlaubt.
+
+**Phase 2 — Schrumpfende Arena (Minuten 2–3):** Arena beginnt zu schrumpfen (Bodensektionen fallen, Wände rücken, Lava steigt — umgebungsspezifisch). Respawns reduziert auf 1. Punkte pro Kill steigen (+50%). NPC-Spawns stoppen.
+
+**Phase 3 — Death Bowl (Letzte 60 Sekunden):** Arena ist ~30% der Originalgröße. Keine Respawns. Nur Eliminierung. Massiver Bonus für jeden Kill (+25 Pkt.). Alle Spieler auf Minimap sichtbar. Letzter Überlebender erhält 200 Bonuspunkte.
+
+**BOWL-Punktetabelle:**
+
+| Aktion | Phase 1 | Phase 2 | Phase 3 |
+|--------|---------|---------|---------|
+| Kill | +10 | +15 | +25 |
+| Überleben (pro 10s) | +2 | +3 | +5 |
+| NPC-Kill | +6 | — | — |
+| Letzter Überlebender | — | — | +200 |
+| Meiste Kills (Matchende) | +50 | — | — |
+
+**Transformer-Modi in BOWL:** Flug-Modus-Spieler haben in Phase 3 einen natürlichen Vorteil (können Bodenhindernissen ausweichen); Mech-Modus-Spieler überleben länger pro Gefecht, sind aber langsam in schrumpfenden Zonen; Auto-Modus ist optimal für Phase 2 Repositionierung.
+
+#### 4.11.4 Arena-Design
+
+WAR-Mode-Arenen müssen drei Kampfebenen unterstützen: **Boden** (Auto-Modus), **Luft** (Flug-Modus), **Plattformen** (Mech-Modus). Dies ist eine einzigartige Design-Herausforderung, die Mariliktux-Arenen von jeder anderen Kart-Spiel-Arena unterscheidet — basierend auf [SuperTuxKarts Arena-Design-Guide](https://supertuxkart.net/Making_Tracks:_Appendix_D:_Soccer_and_Battle_Modes) und [Level-Design-Forschung](https://games.themindstudios.com/post/multiplayer-level-design-techniques/).
+
+**3-Schichten-Vertikales Design:**
+
+```
+Schicht 3: Decke/Hochluft (Flug-Modus dominiert)
+           ↑ Bombenabwürfe, Raketeneinschläge, Luft-Dogfights
+Schicht 2: Plattformen (10–15 m) (Mech-/Flug-Übergangszone)
+           ↑ Rampen, Sprung-Pads, Landeplattformen
+Schicht 1: Boden (0–2 m) (Auto-Modus dominiert)
+           ↑ Volle Fahrfläche, Hindernisse, Tunnel
+```
+
+- **Boden-Ebene (Auto-Modus-primär):** Weite offene Flächen mit Rampen und Hindernissen; Tunnelsysteme (niedrige Decke = Flug-Modus kann nicht eintreten, schafft Auto-/Mech-Zonen); Pickup-Items konzentriert hier; Spawn-Punkte ausschließlich auf Bodenlevel.
+- **Luftraum-Ebene (Flug-Modus-primär):** Offene Luft über der Arena; **Luft-Plattformen** (schwebende Inseln, erhöhte Strukturen) als Landezonen; luftspezifische Pickups (Bombenvorräte, Energiezellen) in der Höhe; Abwärts-Sichtlinien geben Informationsvorteil.
+- **Erhöhte Plattform-Ebene (Mech-Modus-primär):** Erhöhte Plattformen auf 10–15 m Höhe — erreichbar per Rampe (Auto langsam), Sprung (Mech) oder Landung (Flug); verteidigbare Engstellen für Mech-Nahkampf-Builds; klare Abwärts-Schusswinkel.
+
+**Zerstörbare Umgebungen:** Zerbrechliche Hindernisse (Kisten, Säulen, Wände), die durch Waffen/Ramme zerstört werden und Pickup-Items enthüllen. Einsturzgefährdete Plattformen, die nach schwerem Kampf degradieren. Dynamische Gefahren (Explosionsfässer, sich ausbreitendes Feuer). Zerstörte Elemente regenerieren nach 45–60 Sekunden.
+
+**Power-Up-Platzierungsstrategie:** Zentrale Konzentration für mächtigste Pickups (Boss-Waffe, Extraleben) — erzwingt Konvergenz und Kampfzonen. Rand-Platzierung für schwächere Pickups. Höhengestaffelte Pickups (Boden = Standard-Waffen; Plattform/Luft = luftspezifische Waffen). Zeitlich angekündigte High-Value-Pickups mit 10-Sekunden-Vorwarnung erzeugen **Pickup-Rushes**. Knappheit by Design: 1 Pickup-Box pro 2 Spieler, alle 20–30 Sekunden auffrischend.
+
+**Anti-Spawn-Camping:** Mindestens 4 Spawn-Punkte, gleichmäßig verteilt; algorithmische Auswahl (weitester sicherer Punkt von Feinden); 2–3 Sekunden Spawn-Unverwundbarkeit; Cover innerhalb von 5 m jedes Spawn-Punkts; rotierende Spawn-Sperre (10 Sekunden nach Nutzung) — basierend auf [Level-Design-Best-Practices](https://games.themindstudios.com/post/multiplayer-level-design-techniques/).
+
+#### 4.11.5 Scoring und Progression
+
+**Kill/Death/Assist-Matrix:**
+
+| Aktion | Punkte | Hinweis |
+|--------|--------|---------|
+| Kill | +10 | Basis-Kill-Wert |
+| Assist (30%+ Schaden) | +6 | Belohnt Koordination |
+| First Blood | +5 | Eröffnungs-Momentum |
+| Comeback Kill (Kill unter <25% TP) | +5 Bonus | Belohnt Aggression bei niedriger Gesundheit |
+| Kill-Streak ×3 | +5 | Moderater Streak-Bonus |
+| Kill-Streak ×5 | +10 | Eskalierend |
+| Kill-Streak ×7+ | +20 | Signifikant — aber besiegbar |
+| Streak Ender (Kill auf Spieler mit ×3+ Streak) | +15 | Comeback-Mechanik |
+| Tod | 0 (keine Punktstrafe) | Bestrafung durch Respawn-Timer, nicht Score |
+| Überleben (pro 30s am Leben) | +2 | Passiv-Belohnung für Verbleib im Match |
+
+**Keine Punktstrafe bei Tod:** Tod wird bereits durch Respawn-Timer bestraft. Punktstrafen beim Tod erzeugen „Quit-Anreize" — Spieler verlassen das Match, statt sich anzupassen (basierend auf [Killstreak-Design-Analyse](https://www.reddit.com/r/Games/comments/5f38d7/is_the_killstreak_method_of_rewards_actually_a/)).
+
+**Streak-System mit ×10 „Target"-Bounty:**
+
+| Streak | Belohnung | Art |
+|--------|----------|-----|
+| ×3 Kill-Streak | +5 Bonuspunkte + visuelle Krone | Nicht-Kampf-Belohnung |
+| ×5 Kill-Streak | +10 Bonus + Spezial-Waffen-Drop | Einmaliger Pickup |
+| ×7 Kill-Streak | +20 Bonus + 30s Geschwindigkeits-Boost | Temporärer Power-Up |
+| ×10 Kill-Streak | +50 Bonus + Spieler wird sichtbares „Target" | Score-Bounty — Kills auf diesen Spieler sind +30 Punkte wert für alle |
+
+Die ×10-„Target"-Mechanik ist der Schlüssel: Bei 10+ Kills wird der Spieler auf der Minimap aller Spieler mit einer Kopfgeld-Markierung angezeigt. Dies ist eine natürliche Comeback-/Rubber-Banding-Mechanik, die nicht künstlich wirkt — basierend auf [Game AI Pro Rubber-Banding-Forschung](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter42_A_Rubber-Banding_System_for_Gameplay_and_Race_Management.pdf).
+
+**Comeback-Mechaniken:**
+1. **Defizit-Bonus:** Spieler oder Team mit 30+ Punkten Rückstand erhalten +3 Bonus auf alle Kills (subtil, nicht sichtbar für andere).
+2. **Item-Skalierung:** Schlechter platzierte Spieler erhalten bessere Pickup-Items — analog zu [Mario Karts positionsabhängigem Item-System](https://www.polygon.com/mario-kart-8-deluxe-guide/2017/4/28/15473910/battle-mode-tips-balloon-battle-bob-omb-blastrenegade-roundupcoin-runnersshine-thief/).
+3. **Rache-Multiplikator:** Kill des Spielers, der einen zuletzt getötet hat, gewährt +5 „Rache"-Bonus.
+4. **Catch-Up-Spawn:** Spieler, die 3+ mal in Folge gestorben sind, spawnen mit einem kostenlosen „Kampf-Boost" (5s Unverwundbarkeit + 10s +25% Schaden).
+
+**WAR Rating (ELO-System):**
+
+| Metrik | Beschreibung |
+|--------|-------------|
+| WAR Rating | ELO-artiges Rating; passt sich pro Match basierend auf Gegnerstärke an |
+| Siegrate nach Modus | Separate Siegraten für SKAT, REVERSI, TDM, BOWL |
+| Form-Meisterschaft | Kills in jeder Transformer-Form (Auto/Flug/Mech) — trackt Spielstil |
+| Modus-Spezialist-Rang | Separater Rang pro Spielmodus |
+
+**Rang-Stufen:** Bronze → Silber → Gold → Platin → Diamant → Transformer Elite. Saisonaler Soft-Reset (Platzierung 2 Stufen unter dem Höchststand).
+
+**Integration mit Race Credits und Form Tokens:**
+
+- **Race Credits:** Basis 50 Credits pro WAR-Mode-Match; +10 pro Kill, +5 pro Assist, +100 für MVP. WAR-Mode-Verdienst-Rate: 80% des Race-Mode-Äquivalents (kürzere Matches).
+- **Form Tokens:** +2 Form Tokens pro Kill **in einer nicht-Standard-Form** — incentiviert Transformer-Form-Diversität. Spezial-Bonus für Siege in unnatürlicher Form (z. B. BOWL-Sieg im Mech-Modus = 2× Form Tokens).
+- **WAR-Mode-exklusive Freischaltungen:** Waffen-Skins, Fahrzeug-Kriegsbemalung, Kill-Effekt-Animationen nur durch WAR Mode freischaltbar. „WAR-Abzeichen"-Profilbild für Gold-WAR-Rating. Einzigartiges „Alleinspieler"-Badge für 3 SKAT-Siege als Solo-Spieler. „Last Standing"-Trophäe für 10 BOWL-Siege.
+
 ---
 
 ## 5. Evaluationsplan
@@ -1470,6 +1722,22 @@ Network AI Stresstest:
   Messung: Server-CPU bei max. Last; State-Sync-Konsistenz
 ```
 
+### 5.6 WAR Mode Balancing-Tests
+
+Der WAR Mode erfordert spezifische Evaluationsmaßnahmen, die über Standard-Playtest-Methodik hinausgehen:
+
+| Testbereich | Methode | Ziel-Metrik | Akzeptanzkriterium |
+|-------------|---------|-------------|--------------------|
+| **Waffen-Balance** | A/B-Tests mit verschiedenen Schadenswerten; Messung der Kill-Verteilung über alle Waffentypen | Kein Waffentyp > 30% aller Kills | Gleichmäßige Verteilung (±5%) über alle 7 Waffenkategorien |
+| **SKAT Alleinspieler-Siegrate** | 100+ SKAT-Matches mit Spielern gleicher Skill-Stufe; Siegraten-Tracking | Alleinspieler-Siegrate 60–65% | Basierend auf [Dead by Daylight Killer-Balance](https://forums.bhvr.com/dead-by-daylight/discussion/comment/3757363) |
+| **NPC-Punktwert-Kalibrierung** | Messung des PvP-vs-PvE-Punkteanteils pro Match | NPC-Punkte = 20–35% der Gesamtpunkte pro Spieler | Zu niedrig (<15%): NPCs ignoriert; zu hoch (>40%): PvP wird vernachlässigt |
+| **Tri-Modus-Form-Nutzung** | Tracking der Formverteilung (Car/Fly/Mech) pro Arena und Modus | Keine Form < 15% Nutzungsanteil | Balanced Tri-Modus-Design wenn alle Formen viable sind |
+| **Arena-Vertikalbalance** | Heatmap-Analyse der Spieler-Positionen und Kill-Orte pro Ebene | Kills auf allen 3 Ebenen verteilt | Keine Ebene > 50% aller Kills |
+| **Streak-System-Balance** | Messung der ×10-Target-Bounty-Auslöserate und Comeback-Erfolgsrate | Target-Bounty 2–3× pro Match; Streak-Ender-Rate > 60% | Target-Mechanik funktioniert als Comeback-Hebel |
+| **Respawn-Fairness** | Tracking der Spawn-Kill-Rate (Tod < 3s nach Respawn) | Spawn-Kill-Rate < 5% | [Anti-Spawn-Camping-Design](https://games.themindstudios.com/post/multiplayer-level-design-techniques/) |
+
+**Iterationsplan:** Jeder WAR-Mode-Sub-Modus durchläuft mindestens 3 Balance-Iterationen im Design Cycle (Build → Playtest → Adjust). SKAT-Modus erhält höchste Iterationspriorität aufgrund der inhärenten Schwierigkeit asymmetrischer Balance ([Evolve Post-Mortem](https://www.reddit.com/r/Games/comments/8p2s2m/evolve_dev_says_4v1_caused_more_problems_than_we/)).
+
 ---
 
 ## 6. Entwicklungs-Roadmap
@@ -1512,16 +1780,16 @@ PHASE:  ├────PHASE 1────┤├────PHASE 2────�
 
 ### Phase 3: Features (Monate 7–9)
 
-**Ziel:** Level Editor, Modding, Audio-System
+**Ziel:** Level Editor, Modding, Audio-System, WAR Mode
 
 | Woche | Aufgabe | Deliverable |
 |-------|---------|-------------|
 | 1–2 | Node-basierter Track-Editor (Basis) | Strecke mit Node-Editor erstellbar |
 | 3–4 | Visual Scripting für Track-Logik (Trigger/Condition/Effect) | Interaktive Track-Events |
 | 5–6 | Google Blockly Integration + Custom Block-Palette | 10 Custom Blöcke funktional |
-| 7–8 | WASM-Sandboxing für Mods + mod.io Integration | Mod-Sharing-Platform aktiv |
-| 9–10 | Online-Radio (Icecast) + Self-Radio | Radio-System funktional im Spiel |
-| 11–12 | FMOD Dynamisches Musik-System (7 Race-States) | Adaptive Rennmusik implementiert |
+| 7–8 | WAR Mode Kern-Framework: Waffensystem + NPC-Spawning + Arena-Prototyp | WAR-Mode-Basisspielbarkeit mit Tri-Modus-Waffen |
+| 9–10 | WAR Mode Sub-Modi: SKAT, REVERSI, TDM, BOWL implementieren | Alle 4 Sub-Modi spielbar |
+| 11–12 | WAR Mode Scoring/Progression + Arena-Design-Tools + Audio-Integration | WAR Rating, Streak-System, 2 fertige Arenen |
 
 ### Phase 4: Polish (Monate 10–12)
 
@@ -1542,7 +1810,7 @@ PHASE:  ├────PHASE 1────┤├────PHASE 2────�
 |-------|---------|-----------|------------------------|
 | **Foundation** | M 1–3 | Core Engine + Transformation | Erster Modus-Wechsel; ≥ 60 fps bestätigt |
 | **Gameplay** | M 4–6 | KI + Belohnung + Multiplayer | 4-Spieler-Online; Rubber-Banding aktiv |
-| **Features** | M 7–9 | Level-Editor + Modding + Audio | Mod-Sharing aktiv; Blockly-Mods laufen |
+| **Features** | M 7–9 | Level-Editor + Modding + WAR Mode | WAR Mode mit 4 Sub-Modi spielbar; Blockly-Mods laufen |
 | **Polish** | M 10–12 | Performance + Voice + Battle Pass | Öffentlicher Beta-Release |
 
 ---
@@ -1627,7 +1895,7 @@ Das Drei-Zyklen-Modell ([Hevner 2007](https://aisel.aisnet.org/sjis/vol19/iss2/4
 ### Wichtigste Erkenntnisse und Beiträge
 
 **Level 1 — Neues Artefakt (Instanziierung):**
-Ein lauffähiger browserbasierter Transformations-Rennspiel-Prototyp, der erstmals in dieser Kombination folgende Systeme integriert: Multi-Modus Echtzeit-Transformation, WebGPU-Toon-Rendering, WebTransport-Multiplayer, Blockly-Modding und Spatial-Audio-Sprachchat.
+Ein lauffähiger browserbasierter Transformations-Rennspiel-Prototyp, der erstmals in dieser Kombination folgende Systeme integriert: Multi-Modus Echtzeit-Transformation, WebGPU-Toon-Rendering, WebTransport-Multiplayer, Blockly-Modding, Spatial-Audio-Sprachchat und ein WAR-Mode-Kampfsystem mit vier Sub-Modi (SKAT, REVERSI, Team Deathmatch, BOWL) inklusive PvPvE-Design und Tri-Modus-Waffensystem.
 
 **Level 2 — Designprinzipien:**
 - *Transformations-Geschwindigkeit über -Komplexität:* War for Cybertron beweist empirisch, dass < 0,5s Transformationszeit kritischer ist als geometrische Korrektheit.
@@ -1635,6 +1903,8 @@ Ein lauffähiger browserbasierter Transformations-Rennspiel-Prototyp, der erstma
 - *Transform Boost als Skill-Ausdruck:* SASRT's Transform Boost ist ein elegantes Mikro-Reward-Muster, das kompetitive Tiefe ohne Bestrafungs-Mechanismus schafft.
 - *Anti-Pattern-Vermeidung im Reward-System:* Das Forza-Motorsport-Debakel liefert negatives Wissen: XP darf nie an ein einzelnes Fahrzeug gebunden, nie ohne Abschluss-Decke und nie ohne Skill-Ausdruck-Belohnungen sein.
 - *Server-Autorität als Anti-Cheat:* Inputs (nicht Positionen) an den Server senden ist die skalierbar sicherste Multiplayer-Architektur für Rennspiele.
+- *Informationsasymmetrie vor Stat-Asymmetrie:* Im asymmetrischen SKAT-Modus ist der Radar-/Formwechsel-Vorteil des Alleinspielers wirkungsvoller als reine HP-/Schadens-Erhöhungen — eine Erkenntnis aus Pac-Man Vs. und Dead by Daylights Balance-Philosophie.
+- *Kein Score-Abzug bei Tod:* Punktestrafen bei Tod erzeugen Quit-Anreize; Bestrafung durch Respawn-Timer erhält die Spielerbindung — validiert durch Community-Feedback-Analyse in kompetitiven Kampfspielen.
 
 **Level 3 — Design-Theorie (Ansatz):**
 Ein Multi-Modus-Fahrzeug-Gameplay-Framework, das folgende Variablen integriert: Transformations-State-Machine, Modus-spezifische KI-Controller, Modus-spezifische Reward-Tracks und Modus-spezifische Streckenabschnitte — ergibt ein kohärentes Design-Modell für zukünftige Transformations-Rennspiele.
@@ -1644,7 +1914,8 @@ Ein Multi-Modus-Fahrzeug-Gameplay-Framework, das folgende Variablen integriert: 
 1. **Sofort (Woche 1):** Three.js/WebGPU-Projekt aufsetzen; STK-Strecke importieren; Basis-Fahrzeug-Controller implementieren
 2. **Kurzfristig (Monat 1–3):** Erste Transformations-State-Machine funktionsfähig; Performance-Baseline ≥ 60 fps verifiziert
 3. **Mittelfristig (Monat 4–6):** Multiplayer-Prototyp mit 4 Spielern; erste KI-Spieler mit Rubber-Banding
-4. **Langfristig (Monat 7–12):** Level-Editor, Modding-System, Battle Pass, Öffentlicher Beta-Release
+4. **WAR Mode (Monat 7–9):** Tri-Modus-Waffensystem implementieren; SKAT-Balance-Tests (Ziel: 60–65% Alleinspieler-Siegrate); alle 4 Sub-Modi spielbar; erste vertikale 3-Ebenen-Arena
+5. **Langfristig (Monat 10–12):** Level-Editor, Modding-System, WAR-Mode-Ranked (ELO), Battle Pass, Öffentlicher Beta-Release
 
 Das Projekt ist als **Open-Source-Beitrag** zum SuperTuxKart-Ökosystem konzipiert. Alle Kern-Erweiterungen werden unter GPL v3 veröffentlicht — ein Rigor-Cycle-Rückfluss, der neue Erkenntnisse in die Community-Wissensbasis zurückführt und damit den DSR-Kreislauf schließt: *„It is the essence of design science to create and evaluate IT artifacts intended to solve identified organizational problems"* ([Hevner et al. 2004, S. 76](https://wise.vub.ac.be/sites/default/files/thesis_info/design_science.pdf)).
 
